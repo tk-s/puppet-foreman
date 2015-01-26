@@ -84,7 +84,10 @@ class foreman::config {
         mode    => '0644',
         content => template('foreman/pam_service.erb'),
       }
-
+      $apache_user => $::osfamily ? {
+        'Debian': 'www-data,
+        default: 'apache'
+      }
       exec { 'ipa-getkeytab':
         command => "/bin/echo Get keytab \
           && KRB5CCNAME=KEYRING:session:get-http-service-keytab kinit -k \
@@ -94,7 +97,7 @@ class foreman::config {
       } ->
       file { $foreman::http_keytab:
         ensure => file,
-        owner  => apache,
+        owner  => $apache_user,
         mode   => '0600',
       }
 
@@ -116,7 +119,7 @@ class foreman::config {
 
         $sssd_ldap_user_extra_attrs = ensure_value_in_string($::sssd_ldap_user_extra_attrs, ['email:mail', 'lastname:sn', 'firstname:givenname'], ', ')
 
-        $sssd_allowed_uids = ensure_value_in_string($::sssd_allowed_uids, ['apache', 'root'], ', ')
+        $sssd_allowed_uids = ensure_value_in_string($::sssd_allowed_uids, [$apache_user, 'root'], ', ')
 
         $sssd_user_attributes = ensure_value_in_string($::sssd_user_attributes, ['+email', '+firstname', '+lastname'], ', ')
 
