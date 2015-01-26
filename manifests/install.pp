@@ -64,6 +64,13 @@ class foreman::install {
         ::apache::mod { 'lookup_identity': package => 'mod_lookup_identity' }
         include ::apache::mod::auth_kerb
       }
+      'Debian': {
+        # The apache::mod's need to be in install to break circular dependencies
+        ::apache::mod { 'authnz_pam': package => 'libapache2-mod-authnz-pam' }
+        ::apache::mod { 'intercept_form_submit': package => 'libapache2-mod-intercept-form-submit' }
+        ::apache::mod { 'lookup_identity': package => 'libapache2-mod-lookup-identity' }
+        include ::apache::mod::auth_kerb
+      }
       default: {
         fail("${::hostname}: ipa_authentication is not supported on osfamily ${::osfamily}")
       }
